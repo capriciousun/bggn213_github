@@ -1,0 +1,104 @@
+---
+title: "Class11: Alphafold2 Analysis"
+author: "Brian Wells (PID: A69026838)"
+format: pdf
+---
+
+
+Here we post process and inspect our modeling results from AlphaFold2
+
+```{r}
+library(bio3d)
+results_dir <- "HIVprdimer_23119_0/"
+pdb_files <- list.files(results_dir, pattern = ".pdb", full.names = T)
+```
+We first need to align and supperpose these PDB models we can sue the `pdbaln()` function for this:
+
+```{r}
+pdbs <- pdbaln(pdb_files, fit=T, exefile="msa")
+```
+
+
+## the RMSD matrix
+
+A common measure of structural dis-similarity is called RMSD (root mean square distance)
+
+```{r}
+rd <- rmsd(pdbs)
+rd
+```
+
+```{r}
+library(pheatmap)
+
+rownames(rd) <- paste0("m", 1:5)
+colnames(rd) <- paste0("m", 1:5)
+
+pheatmap(rd)
+```
+
+let's view these in mol*. Here we want the fitted coords.
+
+```{r}
+xyz <- pdbfit(pdbs, outpath = "fitted")
+```
+
+A full atom based fitting or supperposition did not work very well because we have multiple chains that are in different conformations
+
+I want to focus our supperpostition on the most invariant part (the rigid "core")
+
+```{r}
+core <- core.find(pdbs)
+```
+
+
+```{r}
+core.inds <- core
+```
+
+```{r}
+xyz <- pdbfit(pdbs, inds=core.inds, outpath = "core_fitted")
+```
+
+To evaluate how good multichain or multidomain models are, we need to look at the PAE scores (Predicted aligned error)
+
+There are output as JSON format files.
+
+```{r}
+pae_files <- list.files(results_dir, pattern = "0.json", full.names = T)
+pae_files
+```
+
+```{r}
+library(jsonlite)
+
+pae1 <- read_json(pae_files[1], simplifyVector = T)
+pae5 <- read_json(pae_files[5], simplifyVector = T)
+```
+
+```{r}
+attributes(pae1)
+```
+
+```{r}
+pae1$max_pae
+pae5$max_pae
+```
+
+```{r}
+plot.dmat(pae5$pae,
+          xlab="Residue No.",
+          ylab= "Residue No.",
+          zlim=c(0,30))
+
+plot.dmat(pae1$pae,
+          xlab="Residue No.",
+          ylab= "Residue No.",
+          zlim=c(0,30))
+```
+
+#main points
+
+We can run AlphaFold on google compute infrastructure :)
+We can read these results into R and process to help us make sense of these models and their PAE and pLDDT scores
+
