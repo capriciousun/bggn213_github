@@ -2,7 +2,7 @@
 Bioinformatics class (Fall 2023)
 
 
-- Class 05: [Data vis with GGPLOT](https://github.com/capriciousun/bggn213_github/blob/main/class5/class5.qmd)
+- Class 05: [Data vis with GGPLOT](https://github.com/capriciousun/bggn213_github/blob/main/class5/class5.md)
 
 - Class 06: [R functions](https://github.com/capriciousun/bggn213_github/blob/main/class5/class06.qmd)
 
