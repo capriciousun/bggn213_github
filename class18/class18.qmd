@@ -1,0 +1,120 @@
+---
+title: "class18"
+author: "Brian Wells (PID: A69026838)"
+format: pdf
+---
+
+```{r}
+#BiocManager::install("tximport")
+#BiocManager::install("rhdf5")
+```
+
+```{r}
+library(tximport)
+# setup the folder and filenames to read
+folders <- dir(pattern="SRR21568*")
+samples <- sub("_quant", "", folders)
+files <- file.path( folders, "abundance.h5" )
+names(files) <- samples
+
+txi.kallisto <- tximport(files, type = "kallisto", txOut = TRUE)
+```
+
+```{r}
+head(txi.kallisto$counts)
+```
+
+```{r}
+colSums(txi.kallisto$counts)
+```
+
+```{r}
+sum(rowSums(txi.kallisto$counts)>0)
+```
+
+```{r}
+#gives estimated transcript counts only when count is larger than 0
+to.keep <- rowSums(txi.kallisto$counts) > 0
+#will filter out the entries with 0 transcripts
+kset.nonzero <- txi.kallisto$counts[to.keep,]
+```
+
+```{r}
+#identifies and removes the entries with no change
+keep2 <- apply(kset.nonzero,1,sd)>0
+x <- kset.nonzero[keep2,]
+```
+
+##PCA
+
+```{r}
+pca <- prcomp(t(x), scale=TRUE)
+summary(pca)
+```
+now to plot the PCA
+
+```{r}
+plot(pca$x[,1], pca$x[,2],
+     col=c("blue","blue","red","red"),
+     xlab="PC1", ylab="PC2", pch=16)
+```
+
+
+now to make it prettier
+```{r}
+library(ggplot2)
+library(ggrepel)
+
+data <- data.frame(condition = factor(rep(c("control", "treatment"), each = 2)))
+rownames(data) <- colnames(txi.kallisto$counts)
+
+data
+```
+```{r}
+y <- as.data.frame(pca$x)
+y$Condition <- as.factor(data$condition)
+
+ggplot(y) +
+  aes(PC1, PC2, col=Condition) +
+  geom_point() +
+  geom_text_repel(label=rownames(y)) +
+  theme_bw()
+```
+
+
+```{r}
+library(DESeq2)
+
+sampleTable <- data.frame(condition = factor(rep(c("control", "treatment"), each = 2)))
+rownames(sampleTable) <- colnames(txi.kallisto$counts)
+```
+
+```{r}
+dds <- DESeqDataSetFromTximport(txi.kallisto,
+                                sampleTable, 
+                                ~condition)
+```
+```{r}
+dds <- DESeq(dds)
+```
+
+```{r}
+res <- results(dds)
+head(res)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
