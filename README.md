@@ -1,2 +1,2 @@
 # BGGN213
-Bioinformatics class
+Bioinformatics class (Fall 2023)
