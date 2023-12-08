@@ -1,2 +1,2 @@
-# bimm142
+# BGGN213
 Bioinformatics class
