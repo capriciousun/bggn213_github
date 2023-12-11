@@ -7,3 +7,5 @@ Bioinformatics class (Fall 2023)
 - Class 06: [R functions](https://github.com/capriciousun/bggn213_github/blob/main/class5/class06.qmd)
 
 - Class 07: [Bioinformatics R packages from CRAN and BioConductor](https://github.com/capriciousun/bggn213_github/blob/main/class5/class07.qmd)
+
+-Class 08: []
